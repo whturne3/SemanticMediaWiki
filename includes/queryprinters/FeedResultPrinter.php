@@ -205,7 +205,9 @@ final class FeedResultPrinter extends FileExportPrinter {
 			// Loop over all values for the property.
 			while ( ( $dataValue = $field->getNextDataValue() ) !== false ) {
 				if ( $dataValue->getDataItem() instanceof SMWDIWikipage ) {
-					$itemSegments[] = Sanitizer::decodeCharReferences( $dataValue->getLongHTMLText() );
+					$itemSegments[] = Sanitizer::decodeCharReferences(
+						$dataValue->getLongWikiText( $this->params['link'] !== 'none' ? smwfGetLinker() : null )
+					);
 				} else {
 					$itemSegments[] = Sanitizer::decodeCharReferences( $dataValue->getWikiValue() );
 				}
@@ -213,7 +215,7 @@ final class FeedResultPrinter extends FileExportPrinter {
 
 			// Join all property values into a single string, separated by a comma
 			if ( $itemSegments !== array() ) {
-				$rowItems[] = implode( ', ', $itemSegments );
+				$rowItems[] = $this->getTextFor( $subject, implode( ', ', $itemSegments ) );
 			}
 		}
 
@@ -245,31 +247,36 @@ final class FeedResultPrinter extends FileExportPrinter {
 	 * @return string
 	 */
 	protected function getPageContent( WikiPage $wikiPage ) {
-		if ( in_array( $this->params['page'], array( 'abstract', 'full' ) ) ) {
-			$parserOptions = new ParserOptions();
-			$parserOptions->setEditSection( false );
-
-			if ( $this->params['page'] === 'abstract' ) {
-				// Abstract of the first 30 words
-				// preg_match( '/^([^.!?\s]*[\.!?\s]+){0,30}/', $wikiPage->getText(), $abstract );
-				// $text = $abstract[0] . ' ...';
-			} else {
-				if ( method_exists( $wikiPage, 'getContent' ) ) {
-					$content = $wikiPage->getContent();
-
-					if ( $content instanceof TextContent ) {
-						$text = $content->getNativeData();
-					} else {
-						return '';
-					}
-				} else {
-					$text = $wikiPage->getText();
-				}
-			}
-			return $GLOBALS['wgParser']->parse( $text, $wikiPage->getTitle(), $parserOptions )->getText();
-		} else {
+		if ( !in_array( $this->params['page'], array( 'abstract', 'full' ) ) ) {
 			return '';
 		}
+
+		if ( method_exists( $wikiPage, 'getContent' ) ) {
+			$content = $wikiPage->getContent();
+
+			if ( $content instanceof TextContent ) {
+				$text = $content->getNativeData();
+			} else {
+				return '';
+			}
+		} else {
+			$text = $wikiPage->getText();
+		}
+
+		return $this->getTextFor( $wikiPage->getTitle(), $text );
+	}
+
+	private function getTextFor( Title $title, $text ) {
+		$parserOptions = new ParserOptions();
+		$parserOptions->setEditSection( false );
+
+		if ( $this->params['page'] === 'abstract' ) {
+			// Abstract of the first 30 words
+			preg_match( '/^([^.!?\s]*[\.!?\s]+){0,30}/', $text, $abstract );
+			$text = $abstract[0] . ' ...';
+		}
+
+		return $GLOBALS['wgParser']->parse( $text, $title, $parserOptions )->getText();
 	}
 
 	/**
@@ -286,7 +293,7 @@ final class FeedResultPrinter extends FileExportPrinter {
 	 * @return string
 	 */
 	protected function feedItemDescription( $items, $pageContent  ) {
-		return FeedItem::stripComment( implode( ',', $items ) ) .
+		return FeedItem::stripComment( implode( '', $items ) ) .
 			FeedItem::stripComment( $pageContent );
 	}
 
@@ -342,4 +349,5 @@ final class FeedResultPrinter extends FileExportPrinter {
 
 		return $params;
 	}
+
 }
