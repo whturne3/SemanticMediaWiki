@@ -958,3 +958,14 @@ $GLOBALS['smwgEnabledInTextAnnotationParserStrictMode'] = true;
 # @default true
 ##
 $GLOBALS['smwgFollowPropertyRedirect'] = true;
+
+###
+# Support decoding (unstripping) of hidden text elements (e.g. `<nowiki>` as in
+# `[[Has description::<nowiki>{{#ask: HasStripMarkers }}</nowiki>]]` etc.)
+# within an annotation value (can only be stored together with a `_txt` type
+# property).
+#
+# @since 2.4
+##
+$GLOBALS['smwgExtendedTextValueAnnotationSupport'] = false;
+##

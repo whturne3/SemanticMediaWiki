@@ -16,6 +16,7 @@ use Onoi\HttpRequest\HttpRequestFactory;
 use SMW\ParserFunctions\DocumentationParserFunction;
 use SMW\ParserFunctions\InfoParserFunction;
 use ParserHooks\HookRegistrant;
+use SMW\MediaWiki\TextStripMarkerDecoder;
 
 /**
  * @license GNU GPL v2+
@@ -209,11 +210,14 @@ class HookRegistry {
 		 *
 		 * @see https://www.mediawiki.org/wiki/Manual:Hooks/InternalParseBeforeLinks
 		 */
-		$this->handlers['InternalParseBeforeLinks'] = function ( &$parser, &$text ) {
+		$this->handlers['InternalParseBeforeLinks'] = function ( &$parser, &$text, &$stripState ) {
+
+			$textStripMarkerDecoder = new TextStripMarkerDecoder( $stripState );
 
 			$internalParseBeforeLinks = new InternalParseBeforeLinks(
 				$parser,
-				$text
+				$text,
+				$textStripMarkerDecoder
 			);
 
 			return $internalParseBeforeLinks->process();

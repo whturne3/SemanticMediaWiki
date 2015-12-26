@@ -4,6 +4,7 @@ namespace SMW;
 
 use SMW\MediaWiki\MagicWordsFinder;
 use SMW\MediaWiki\RedirectTargetFinder;
+use SMW\MediaWiki\TextStripMarkerDecoder;
 use SMWOutputs;
 use Title;
 use Hooks;
@@ -58,6 +59,11 @@ class InTextAnnotationParser {
 	protected $settings = null;
 
 	/**
+	 * @var TextStripMarkerDecoder
+	 */
+	private $stripMarkerDecoder = null;
+
+	/**
 	 * @var boolean
 	 */
 	protected $isEnabledNamespace;
@@ -103,6 +109,24 @@ class InTextAnnotationParser {
 	}
 
 	/**
+	 * @since 2.4
+	 *
+	 * @param TextStripMarkerDecoder $stripMarkerDecoder
+	 */
+	public function setStripMarkerDecoder( TextStripMarkerDecoder $stripMarkerDecoder ) {
+		$this->stripMarkerDecoder = $stripMarkerDecoder;
+	}
+
+	/**
+	 * @since 2.1
+	 *
+	 * @param Title|null $redirectTarget
+	 */
+	public function setRedirectTarget( Title $redirectTarget = null ) {
+		$this->redirectTargetFinder->setRedirectTarget( $redirectTarget );
+	}
+
+	/**
 	 * Parsing text before an article is displayed or previewed, strip out
 	 * semantic properties and add them to the ParserOutput object
 	 *
@@ -145,7 +169,7 @@ class InTextAnnotationParser {
 	 *
 	 * @param string $text
 	 *
-	 * @return text
+	 * @return string
 	 */
 	public static function decodeSquareBracket( $text ) {
 		return str_replace( array( '%5B', '%5D' ), array( '[', ']' ), $text );
@@ -156,7 +180,7 @@ class InTextAnnotationParser {
 	 *
 	 * @param string $text
 	 *
-	 * @return text
+	 * @return string
 	 */
 	public static function obscureAnnotation( $text ) {
 		return preg_replace_callback(
@@ -173,7 +197,7 @@ class InTextAnnotationParser {
 	 *
 	 * @param string $text
 	 *
-	 * @return text
+	 * @return string
 	 */
 	public static function removeAnnotation( $text ) {
 		return preg_replace_callback(
@@ -199,15 +223,6 @@ class InTextAnnotationParser {
 			},
 			self::decodeSquareBracket( $text )
 		);
-	}
-
-	/**
-	 * @since 2.1
-	 *
-	 * @param Title|null $redirectTarget
-	 */
-	public function setRedirectTarget( Title $redirectTarget = null ) {
-		$this->redirectTargetFinder->setRedirectTarget( $redirectTarget );
 	}
 
 	protected function addRedirectTargetAnnotation( $text ) {
@@ -383,6 +398,7 @@ class InTextAnnotationParser {
 	protected function addPropertyValue( array $properties, $value, $valueCaption ) {
 
 		$subject = $this->parserData->getSubject();
+		$usedStripMarkerDecoder = $this->tryToDecodeStripMarkerFor( $value );
 
 		// Add properties to the semantic container
 		foreach ( $properties as $property ) {
@@ -398,8 +414,10 @@ class InTextAnnotationParser {
 			}
 		}
 
-		// Return the text representation
-		$result = $dataValue->getShortWikitext( true );
+		// Return the wikitext or the unmodified text representation in case of
+		// a strip marker in order for the standard Parser to work its magic since
+		// we were only interested in the value for the annotation
+		$result = $usedStripMarkerDecoder ? $this->stripMarkerDecoder->getUnmodifiedText() : $dataValue->getShortWikitext( true );
 
 		// If necessary add an error text
 		if ( ( $this->settings->get( 'smwgInlineErrors' ) &&
@@ -411,6 +429,21 @@ class InTextAnnotationParser {
 		}
 
 		return $result;
+	}
+
+	private function tryToDecodeStripMarkerFor( &$value ) {
+
+		$hasStripMarker = false;
+
+		if ( $this->stripMarkerDecoder !== null && $this->stripMarkerDecoder->canUse() ) {
+			$hasStripMarker = $this->stripMarkerDecoder->hasStripMarker( $value );
+		}
+
+		if ( $hasStripMarker ) {
+			$value = $this->stripMarkerDecoder->unstrip( $value );
+		}
+
+		return $hasStripMarker;
 	}
 
 	protected function doStripMagicWordsFromText( &$text ) {

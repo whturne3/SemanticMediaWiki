@@ -4,6 +4,7 @@ namespace SMW\MediaWiki\Hooks;
 
 use Parser;
 use SMW\ApplicationFactory;
+use SMW\MediaWiki\TextStripMarkerDecoder;
 
 /**
  * Hook: InternalParseBeforeLinks is used to process the expanded wiki
@@ -37,6 +38,11 @@ class InternalParseBeforeLinks {
 	private $text;
 
 	/**
+	 * @var TextStripMarkerDecoder
+	 */
+	private $textStripMarkerDecoder;
+
+	/**
 	 * @var ApplicationFactory
 	 */
 	private $applicationFactory;
@@ -46,10 +52,12 @@ class InternalParseBeforeLinks {
 	 *
 	 * @param Parser $parser
 	 * @param string $text
+	 * @param TextStripMarkerDecoder $textStripMarkerDecoder
 	 */
-	public function __construct( Parser &$parser, &$text ) {
+	public function __construct( Parser &$parser, &$text, $textStripMarkerDecoder ) {
 		$this->parser = $parser;
 		$this->text =& $text;
+		$this->textStripMarkerDecoder = $textStripMarkerDecoder;
 		$this->applicationFactory = ApplicationFactory::getInstance();
 	}
 
@@ -99,6 +107,10 @@ class InternalParseBeforeLinks {
 			$this->parser->getOutput()
 		);
 
+		$this->textStripMarkerDecoder->setDecoderUsageState(
+			$this->applicationFactory->getSettings()->get( 'smwgExtendedTextValueAnnotationSupport' )
+		);
+
 		/**
 		 * Performs [[link::syntax]] parsing and adding of property annotations
 		 * to the ParserOutput
@@ -107,6 +119,8 @@ class InternalParseBeforeLinks {
 		 */
 		$inTextAnnotationParser = $this->applicationFactory->newInTextAnnotationParser( $parserData );
 		$inTextAnnotationParser->setRedirectTarget( $this->getRedirectTarget() );
+		$inTextAnnotationParser->setStripMarkerDecoder( $this->textStripMarkerDecoder );
+
 		$inTextAnnotationParser->parse( $this->text );
 
 		$parserData->setSemanticDataStateToParserOutputProperty();

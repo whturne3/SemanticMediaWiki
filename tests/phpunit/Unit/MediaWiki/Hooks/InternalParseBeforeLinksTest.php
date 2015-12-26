@@ -53,11 +53,15 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 			->disableOriginalConstructor()
 			->getMock();
 
+		$textStripMarkerDecoder = $this->getMockBuilder( '\SMW\MediaWiki\TextStripMarkerDecoder' )
+			->disableOriginalConstructor()
+			->getMock();
+
 		$text = '';
 
 		$this->assertInstanceOf(
 			'\SMW\MediaWiki\Hooks\InternalParseBeforeLinks',
-			new InternalParseBeforeLinks( $parser, $text )
+			new InternalParseBeforeLinks( $parser, $text, $textStripMarkerDecoder )
 		);
 	}
 
@@ -72,9 +76,14 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 		$parser->expects( $this->once() )
 			->method( 'getOptions' );
 
+		$textStripMarkerDecoder = $this->getMockBuilder( '\SMW\MediaWiki\TextStripMarkerDecoder' )
+			->disableOriginalConstructor()
+			->getMock();
+
 		$instance = new InternalParseBeforeLinks(
 			$parser,
-			$text
+			$text,
+			$textStripMarkerDecoder
 		);
 
 		$this->assertTrue( $instance->process() );
@@ -103,9 +112,14 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 		$parser->expects( $this->never() )
 			->method( 'getTitle' );
 
+		$textStripMarkerDecoder = $this->getMockBuilder( '\SMW\MediaWiki\TextStripMarkerDecoder' )
+			->disableOriginalConstructor()
+			->getMock();
+
 		$instance = new InternalParseBeforeLinks(
 			$parser,
-			$text
+			$text,
+			$textStripMarkerDecoder
 		);
 
 		$this->assertTrue( $instance->process() );
@@ -119,9 +133,14 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 		$text   = 'Foo';
 		$parser = $this->parserFactory->newFromTitle( $title );
 
+		$textStripMarkerDecoder = $this->getMockBuilder( '\SMW\MediaWiki\TextStripMarkerDecoder' )
+			->disableOriginalConstructor()
+			->getMock();
+
 		$instance = new InternalParseBeforeLinks(
 			$parser,
-			$text
+			$text,
+			$textStripMarkerDecoder
 		);
 
 		$this->assertTrue( $instance->process() );
@@ -135,9 +154,14 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 		$text   = $parameters['text'];
 		$parser = $this->parserFactory->newFromTitle( $parameters['title'] );
 
+		$textStripMarkerDecoder = $this->getMockBuilder( '\SMW\MediaWiki\TextStripMarkerDecoder' )
+			->disableOriginalConstructor()
+			->getMock();
+
 		$instance = new InternalParseBeforeLinks(
 			$parser,
-			$text
+			$text,
+			$textStripMarkerDecoder
 		);
 
 		$this->applicationFactory->registerObject(
@@ -222,6 +246,7 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 					'smwgEnabledInTextAnnotationParserStrictMode' => true,
 					'smwgLinksInValues' => false,
 					'smwgInlineErrors'  => true,
+					'smwgExtendedTextValueAnnotationSupport' => false
 				),
 				'text'  => 'Lorem ipsum dolor sit &$% [[FooBar::dictumst|寒い]]' .
 					' [[Bar::tincidunt semper]] facilisi {{volutpat}} Ut quis' .
@@ -245,6 +270,7 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 					'smwgEnabledInTextAnnotationParserStrictMode' => true,
 					'smwgLinksInValues' => false,
 					'smwgInlineErrors'  => true,
+					'smwgExtendedTextValueAnnotationSupport' => false
 				),
 				'text'  => '#REDIRECT [[Foo]]',
 				),
@@ -267,7 +293,8 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 					'smwgEnabledInTextAnnotationParserStrictMode' => true,
 					'smwgLinksInValues' => false,
 					'smwgInlineErrors'  => true,
-					'smwgEnabledSpecialPage' => array( 'Ask', 'Foo' )
+					'smwgEnabledSpecialPage' => array( 'Ask', 'Foo' ),
+					'smwgExtendedTextValueAnnotationSupport' => false
 				),
 				'text'  => 'Lorem ipsum dolor sit &$% [[FooBar::dictumst|寒い]]' .
 					' [[Bar::tincidunt semper]] facilisi {{volutpat}} Ut quis' .
@@ -292,7 +319,8 @@ class InternalParseBeforeLinksTest extends \PHPUnit_Framework_TestCase {
 					'smwgEnabledInTextAnnotationParserStrictMode' => true,
 					'smwgLinksInValues' => false,
 					'smwgInlineErrors'  => true,
-					'smwgEnabledSpecialPage' => array( 'Ask', 'Foo' )
+					'smwgEnabledSpecialPage' => array( 'Ask', 'Foo' ),
+					'smwgExtendedTextValueAnnotationSupport' => false
 				),
 				'text'  => 'Lorem ipsum dolor sit &$% [[FooBar::dictumst|寒い]]' .
 					' [[Bar::tincidunt semper]] facilisi {{volutpat}} Ut quis' .

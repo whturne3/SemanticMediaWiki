@@ -34,11 +34,12 @@ class OutputPageParserOutputTest extends \PHPUnit_Framework_TestCase {
 		$this->applicationFactory = ApplicationFactory::getInstance();
 
 		$settings = array(
-			'smwgShowFactbox'      => SMW_FACTBOX_NONEMPTY,
-			'smwgFactboxUseCache'  => true,
-			'smwgCacheType'        => 'hash',
-			'smwgLinksInValues'    => false,
-			'smwgInlineErrors'     => true,
+			'smwgShowFactbox'                 => SMW_FACTBOX_NONEMPTY,
+			'smwgFactboxUseCache'             => true,
+			'smwgCacheType'                   => 'hash',
+			'smwgLinksInValues'               => false,
+			'smwgInlineErrors'                => true,
+			'smwgExtendedTextValueAnnotationSupport' => false
 		);
 
 		foreach ( $settings as $key => $value ) {

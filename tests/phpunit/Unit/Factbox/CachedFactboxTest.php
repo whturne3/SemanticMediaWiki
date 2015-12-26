@@ -43,7 +43,8 @@ class CachedFactboxTest extends \PHPUnit_Framework_TestCase {
 			'smwgFactboxUseCache' => true,
 			'smwgCacheType'       => 'hash',
 			'smwgLinksInValues'   => false,
-			'smwgInlineErrors'    => true
+			'smwgInlineErrors'    => true,
+			'smwgExtendedTextValueAnnotationSupport' => false
 		);
 
 		foreach ( $settings as $key => $value ) {
