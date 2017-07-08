@@ -239,8 +239,10 @@ function smwfGetLinker() {
  *
  * @codeCoverageIgnore
  */
-function enableSemantics( $namespace = null, $complete = false ) {
+function enableSemanticMediaWiki( $namespace = null, $complete = false ) {
 	global $smwgNamespace;
+
+	wfLoadExtension( 'SemanticMediaWiki' );
 
 	// Apparently this is required (1.28+) as the earliest possible execution
 	// point in order for settings that refer to the SMW_NS_PROPERTY namespace
@@ -262,6 +264,13 @@ function enableSemantics( $namespace = null, $complete = false ) {
 }
 
 /**
+ * @deprecated since 3.0, use enableSemanticMediaWiki
+ */
+function enableSemantics( $namespace = null, $complete = false ) {
+	return enableSemanticMediaWiki( $namespace, $complete );
+}
+
+/**
  * To disable Semantic MediaWiki's operational functionality
  *
  * @note This function can be used to temporary disable SMW but it is paramount
@@ -269,6 +278,6 @@ function enableSemantics( $namespace = null, $complete = false ) {
  * represent a state that mirrors the actual environment (deleted, moved pages
  * are not tracked when disabled).
  */
-function disableSemantics() {
+function disableSemanticMediaWiki() {
 	CompatibilityMode::disableSemantics();
 }
