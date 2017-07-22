@@ -117,6 +117,7 @@ class JsonTestCaseScriptRunnerTest extends JsonTestCaseScriptRunner {
 		// Make sure LocalSettings don't interfere with the default settings
 		$GLOBALS['smwgDVFeatures'] = $GLOBALS['smwgDVFeatures'] & ~SMW_DV_NUMV_USPACE;
 		$GLOBALS['smwgFieldTypeFeatures'] = SMW_FIELDT_NONE;
+		$GLOBALS['smwgValueLookupCacheType'] = CACHE_NONE;
 
 		$this->testEnvironment->addConfiguration( 'smwgQueryResultCacheType', false );
 		$this->testEnvironment->addConfiguration( 'smwgQFilterDuplicates', false );

@@ -273,7 +273,7 @@ class SQLStoreFactory {
 	 */
 	public function newEntityLookup() {
 
-		$settings = $this->applicationFactory->getSettings();
+		$settings = ApplicationFactory::getInstance()->getSettings();
 		$directEntityLookup = new DirectEntityLookup( $this->store );
 
 		if ( $settings->get( 'smwgValueLookupCacheType' ) === CACHE_NONE ) {

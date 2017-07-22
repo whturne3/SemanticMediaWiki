@@ -625,6 +625,7 @@ class SMWSQLStore3 extends SMWStore {
 		$this->m_semdata = array();
 		$this->m_sdstate = array();
 		$this->propertyTableInfoFetcher = null;
+		$this->entityLookup = null;
 		$this->getObjectIds()->clearCaches();
 	}
 
